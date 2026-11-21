@@ -1,0 +1,38 @@
+# Dockerfile.alien-os — Alien OS overlay on Redroid 14
+# From runbook §6.2 (~/workspace/goals/alien-os/files/redroid-install-runbook.md).
+# Status: SKELETON ONLY. The COPY lines are placeholders until real Alien OS
+# APKs / assets exist. Do not build this as-is and call it Alien OS.
+#
+# Build (on a machine with Docker, e.g. the Oracle instance once it exists):
+#   docker build -f Dockerfile.alien-os -t alien-os:14.0.0 .
+# Run exactly as in runbook §3, replacing redroid/redroid:14.0.0-240527
+# with alien-os:14.0.0, keeping ro.secure=0 ro.debuggable=1 and
+# androidboot.redroid_gpu_mode=guest.
+
+FROM redroid/redroid:14.0.0-240527
+
+# Alien OS apps, launcher, and assets are copied in at build time.
+# Replace the placeholder paths with the real Alien OS APKs / files.
+# COPY alien-launcher.apk /system/priv-app/AlienLauncher/AlienLauncher.apk
+# COPY alien-apps/ /system/app/
+# COPY alien-wallpapers/ /system/media/alien/
+# COPY alien-boot/ /system/etc/alien/
+
+# Props are set at `docker run` time (see runbook §3), not baked in here,
+# so the same image can be run with different screen sizes.
+
+# Notes for the overlay (runbook §6.3):
+# - Launcher: adb install alien-launcher.apk, then
+#   adb shell cmd package set-home-activity <pkg>/<Activity>
+#   and verify it actually appears on boot.
+# - Alien OS data (Wi-Fi Auditor wordlists/configs, Comms Lab rules,
+#   Mesh Text settings) lives in /data, backed by /home/ubuntu/alien-data
+#   on the host — that is the state to back up.
+# - Telegram as the handset = the real Telegram Android app installed
+#   on Redroid and signed in there (replaces the web prototype's handset).
+# - Root: Redroid's ro.secure=0 / ro.debuggable=1 already gives adb root
+#   (uid=0) on every boot. Do NOT use Magisk bootless/boot-image on
+#   Redroid 13/14 — it is broken there. KernelSU-Next in the host kernel
+#   is the later permanent-root path, only after §3–§4 are verified.
+# - Reboot test: docker restart alien-os, wait 90s, re-run runbook §4.
+#   Root, launcher, and apps must all survive a restart.
